@@ -68,6 +68,7 @@ func _physics_process(delta: float) -> void:
 				coyote_time = 0.1
 			
 			if should_wall_climb():
+				animation_player_upper.play("hang")
 				state = States.CLIMB
 			
 		States.CLIMB:
@@ -86,7 +87,20 @@ func _physics_process(delta: float) -> void:
 			
 			var request_detach: bool = sign(input.x) == wall_normal.x
 			
+			var request_wall_jump: bool = (
+				(request_detach or Input.is_action_just_pressed("jump"))
+				and not Input.is_action_pressed("move_down")
+			)
+			
+			if request_wall_jump:
+				velocity.x = wall_normal.x * max_speed
+				anchor.scale.x = sign(velocity.x)
+				jump()
+				state = States.MOVE
+			
 			if not should_wall_climb() or request_detach:
+				if Input.is_action_pressed("move_up"):
+					jump()
 				state = States.MOVE
 
 
