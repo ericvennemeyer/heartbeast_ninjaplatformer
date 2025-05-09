@@ -20,6 +20,7 @@ var coyote_time := 0.0
 @onready var animation_player_lower: AnimationPlayer = $AnimationPlayerLower
 @onready var ray_cast_upper: RayCast2D = $Anchor/RayCastUpper
 @onready var ray_cast_lower: RayCast2D = $Anchor/RayCastLower
+@onready var hurtbox: Hurtbox = $Anchor/Hurtbox
 
 
 func _ready() -> void:
@@ -31,6 +32,10 @@ func _ready() -> void:
 		if anim_name != "attack": return
 		animation_player_upper.play(animation_player_lower.current_animation)
 		animation_player_upper.seek(animation_player_lower.current_animation_position)
+		)
+	
+	hurtbox.hurt.connect(func(other_hitbox: Hitbox):
+		queue_free()
 		)
 
 
