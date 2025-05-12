@@ -26,3 +26,6 @@ tile_set = SubResource("TileSet_dwbse")
 
 [node name="EnemyCannon" parent="." instance=ExtResource("4_036b0")]
 position = Vector2(224, 128)
+
+[node name="EnemyCannon2" parent="." instance=ExtResource("4_036b0")]
+position = Vector2(170, 128)
