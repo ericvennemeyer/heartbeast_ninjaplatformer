@@ -7,11 +7,13 @@ extends Node2D
 		stats = stats.duplicate()
 
 @onready var hurtbox: Hurtbox = $Hurtbox
+@onready var effects_animation_player: AnimationPlayer = $EffectsAnimationPlayer
 
 
 func _ready() -> void:
 	hurtbox.hurt.connect(func(other_hitbox: Hitbox):
 		stats.health -= other_hitbox.damage
+		effects_animation_player.play("hitflash")
 	)
 	stats.no_health.connect(func(): 
 		queue_free()
