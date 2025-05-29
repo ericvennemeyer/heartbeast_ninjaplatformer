@@ -1,5 +1,7 @@
 extends Node2D
 
+const SPARK_PARTICLE_BURST_EFFECT = preload("res://sparks_particle_burst_effect.tscn")
+
 @export var stats: Stats:
 	set(value):
 		stats = value
@@ -15,6 +17,10 @@ extends Node2D
 
 func _ready() -> void:
 	hurtbox.hurt.connect(func(other_hitbox: Hitbox):
+		var spark_particle = SPARK_PARTICLE_BURST_EFFECT.instantiate()
+		get_tree().current_scene.add_child(spark_particle) # Add as child of root node, "world" in this case
+		spark_particle.global_position = sprite_2d.global_position # Sprite has been moved up from origin of scene
+		
 		stats.health -= other_hitbox.damage
 		effects_animation_player.play("hitflash")
 		shaker.shake(2.0, 0.2)
