@@ -25,7 +25,7 @@ tile_map_data = PackedByteArray("AAD//wgAAAAAAAAAAAD//wkAAAAAAAAAAAD//woAAAAAAAA
 tile_set = SubResource("TileSet_dwbse")
 
 [node name="EnemyCannon" parent="." instance=ExtResource("4_036b0")]
-position = Vector2(224, 128)
+position = Vector2(245, 128)
 
 [node name="EnemyCannon2" parent="." instance=ExtResource("4_036b0")]
-position = Vector2(170, 128)
+position = Vector2(192, 128)
