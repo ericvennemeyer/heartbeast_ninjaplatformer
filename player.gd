@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-enum States { MOVE, CLIMB }
+enum States { MOVE, CLIMB, HIT }
 
 @export var state = States.MOVE
 
@@ -16,14 +16,21 @@ enum States { MOVE, CLIMB }
 var coyote_time := 0.0
 
 @onready var anchor: Node2D = $Anchor
+@onready var sprite_upper: Sprite2D = $Anchor/SpriteUpper
+@onready var sprite_lower: Sprite2D = $Anchor/SpriteLower
 @onready var animation_player_upper: AnimationPlayer = $AnimationPlayerUpper
 @onready var animation_player_lower: AnimationPlayer = $AnimationPlayerLower
+@onready var effects_animation_player: AnimationPlayer = $EffectsAnimationPlayer
 @onready var ray_cast_upper: RayCast2D = $Anchor/RayCastUpper
 @onready var ray_cast_lower: RayCast2D = $Anchor/RayCastLower
 @onready var hurtbox: Hurtbox = $Anchor/Hurtbox
+@onready var shaker_upper: Shaker = Shaker.new(sprite_upper)
+@onready var shaker_lower: Shaker = Shaker.new(sprite_lower)
 
 
 func _ready() -> void:
+	sprite_lower.material.set_shader_parameter("flash_color", Color("ff4d4d"))
+	
 	animation_player_lower.current_animation_changed.connect(func(anim_name: String):
 		if animation_player_upper.current_animation == "attack": return
 		animation_player_upper.play(anim_name)
@@ -35,7 +42,15 @@ func _ready() -> void:
 		)
 	
 	hurtbox.hurt.connect(func(other_hitbox: Hitbox):
-		queue_free()
+		var x_direction = sign(other_hitbox.global_position.direction_to(global_position).x)
+		if x_direction == 0: x_direction = -1
+		velocity.x = x_direction * max_speed
+		jump(jump_amount / 2)
+		state = States.HIT
+		shaker_upper.shake(3.0, 0.3)
+		shaker_lower.shake(3.0, 0.3)
+		animation_player_lower.play("jump")
+		effects_animation_player.play("hitflash")
 		)
 
 
@@ -107,10 +122,15 @@ func _physics_process(delta: float) -> void:
 				if Input.is_action_pressed("move_up"):
 					jump()
 				state = States.MOVE
+		
+		States.HIT:
+			move_and_slide()
+			apply_friction(delta)
+			apply_gravity(delta)
 
 
-func jump() -> void:
-	velocity.y = -jump_amount
+func jump(amount: = jump_amount) -> void: # This syntax sets a default value for the argument "amount"
+	velocity.y = -amount
 
 
 func accelerate_horizontally(horizontal_direction: float, delta: float) -> void:
