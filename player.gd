@@ -2,6 +2,7 @@ extends CharacterBody2D
 
 enum States { MOVE, CLIMB, HIT }
 
+@export var stats: Stats
 @export var state = States.MOVE
 
 @export var max_speed := 120
@@ -26,10 +27,16 @@ var coyote_time := 0.0
 @onready var hurtbox: Hurtbox = $Anchor/Hurtbox
 @onready var shaker_upper: Shaker = Shaker.new(sprite_upper)
 @onready var shaker_lower: Shaker = Shaker.new(sprite_lower)
+@onready var camera_2d: Camera2D = $Camera2D
 
 
 func _ready() -> void:
 	sprite_lower.material.set_shader_parameter("flash_color", Color("ff4d4d"))
+	
+	stats.no_health.connect(func():
+		camera_2d.reparent(get_tree().current_scene)
+		queue_free()
+		)
 	
 	animation_player_lower.current_animation_changed.connect(func(anim_name: String):
 		if animation_player_upper.current_animation == "attack": return
@@ -42,15 +49,22 @@ func _ready() -> void:
 		)
 	
 	hurtbox.hurt.connect(func(other_hitbox: Hitbox):
+		# Knockback
 		var x_direction = sign(other_hitbox.global_position.direction_to(global_position).x)
 		if x_direction == 0: x_direction = -1
 		velocity.x = x_direction * max_speed
 		jump(jump_amount / 2)
+		# Enter HIT state so input won't be processed
 		state = States.HIT
+		# Shake player sprites
 		shaker_upper.shake(3.0, 0.3)
 		shaker_lower.shake(3.0, 0.3)
+		# Make sure we're in the jump animation while in HIT state
 		animation_player_lower.play("jump")
+		# Play flash animation, which also sets is_invincible back to false, and state back to MOVE
 		effects_animation_player.play("hitflash")
+		# Subtract damage dealt by enemy from player health
+		stats.health -= other_hitbox.damage
 		)
 
 

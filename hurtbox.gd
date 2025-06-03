@@ -3,6 +3,8 @@ class_name Hurtbox extends Area2D
 @export var is_invincible: bool = false:
 	set(value):
 		is_invincible = value
+		# Following code essentially "resets" collision shape so player can still take damage
+		# if touching enemy after invincibility period ends
 		var children = get_children()
 		for child in children:
 			if child is not CollisionShape2D and child is not CollisionPolygon2D:
